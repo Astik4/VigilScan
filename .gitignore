@@ -1,0 +1,19 @@
+# Python compilation files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Local SQLite databases (vulnerability cache)
+cve_cache.db
+cve_cache.db-journal
+
+# Scan report exports (JSON & HTML)
+*.json
+*.html
+
+# OS specific files
+.DS_Store
+Thumbs.db
+
+# Virtual environment directories
+.env
