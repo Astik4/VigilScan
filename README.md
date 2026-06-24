@@ -36,33 +36,54 @@ pip install -r requirements.txt
 
 ## Usage Guide
 
-The tool is invoked via `scanner.py`. Run `python scanner.py --help` to view all parameters.
+The tool is invoked via `vigilscan.py`. Run `python vigilscan.py --help` to view all parameters.
 
 ```bash
-usage: scanner.py [-h] [-p PORTS] [-T {1,2,3,4,5}] [-th THREADS] [-to TIMEOUT] [-oA OUTPUT_ALL] [-oJ JSON] [-oH HTML] target
+usage: vigilscan.py [-h] [-p PORTS] [-sT] [-sS] [-Pn] [--open]
+                    [--packet-trace] [-sV] [-sn] [-F] [-v] [-O] [-A]
+                    [-T {1,2,3,4,5}] [-th THREADS] [-to TIMEOUT]
+                    [-oA OUTPUT_ALL] [-oJ JSON] [-oH HTML]
+                    target
+
+Risk-Scoring Port Scanner - A security audit tool that scans ports, detects services, matches NVD CVEs, and scores host risk.
 
 positional arguments:
   target                Target hostname or IP address to scan (e.g., '127.0.0.1', 'scanme.nmap.org')
 
 options:
   -h, --help            show this help message and exit
-  -p PORTS              Ports to scan (default: 'top100'). Options:
+  -p PORTS              Ports to scan (default: 'top1000', or 'top100' if -F is specified). Options:
                           - 'top100': scans 100 most common TCP ports
                           - 'top1000': scans 1000 common TCP ports (well-known 1-1024 + selected high)
                           - Nmap-style: list (e.g. '22,80,443'), ranges ('1-1024', '80-', '-80'), or '-' for all ports
-  -T {1,2,3,4,5}        Timing template (1-5) for performance tuning (default: 4)
+  -sT                   TCP Connect Scan (default behavior)
+  -sS                   Stealth SYN Scan (requires root/admin privileges)
+  -Pn                   Skip host discovery - assume all target hosts are online
+  --open                Only display open and confirmed ports in reports
+  --packet-trace        Enable diagnostic packet/socket trace output
+  -sV                   Enable service version detection and NVD vulnerability audit
+  -sn                   Ping scan - Host discovery only (skip port scan)
+  -F                    Fast scan - scan the top 100 ports instead of top 1000
+  -v, --verbose         Verbose mode - specify multiple times for more verbosity:
+                          -v:   Print open ports as they are discovered
+                          -vv:  Print open/closed ports and enable connection packet tracing
+                          -vvv: Print open/closed/filtered ports, trace connections, and log detailed NVD API endpoints/caching details
+  -O                    OS detection - guess target OS based on TTL and version banners
+  -A                    Aggressive scan template - enable OS detection (-O), service version detection (-sV),
+                        web app fingerprinter (script scan), and automatically set verbosity to level 1 (or higher)
+  -T {1,2,3,4,5}        Timing template (1-5) for automatic performance tuning (default: 4)
                           - 1: Sneaky (1 thread, 5.0s timeout)
                           - 2: Polite (5 threads, 3.0s timeout)
                           - 3: Normal (30 threads, 1.5s timeout)
                           - 4: Aggressive (100 threads, 1.0s timeout)
                           - 5: Insane (200 threads, 0.5s timeout)
-  -th THREADS, --threads THREADS
+  -th, --threads THREADS
                         Number of concurrent scanning threads (Overrides -T)
-  -to TIMEOUT, --timeout TIMEOUT
+  -to, --timeout TIMEOUT
                         Timeout in seconds for port connections (Overrides -T)
-  -oA OUTPUT_ALL        Export reports in ALL formats (JSON & HTML) using specified prefix
-  -oJ JSON              Export report in JSON format to specified filepath
-  -oH HTML              Export report in HTML format to specified filepath
+  -oA OUTPUT_ALL        Export reports in ALL formats (JSON & HTML) using the specified prefix
+  -oJ JSON              Export report in JSON format to the specified filepath
+  -oH HTML              Export report in HTML format to the specified filepath
 ```
 
 ### Command Examples
@@ -70,23 +91,23 @@ options:
 #### 1. Basic Scan (Top 100 Ports)
 Scans the top 100 most common ports of localhost and outputs results directly to the console:
 ```bash
-python scanner.py 127.0.0.1
+python vigilscan.py 127.0.0.1 -F
 ```
 
 #### 2. Specific Port Range with Insane Speed (-T5)
 Scans ports 1 through 1024 with timing template 5 (200 threads, 0.5s timeout):
 ```bash
-python scanner.py 192.168.1.1 -p 1-1024 -T 5
+python vigilscan.py 192.168.1.1 -p 1-1024 -T 5
 ```
 
 #### 3. Custom Nmap-style Port Ranges
 Scan a specific range or all ports:
 ```bash
 # Scan ports from 80 to 65535
-python scanner.py 192.168.1.1 -p 80-
+python vigilscan.py 192.168.1.1 -p 80-
 
 # Scan all ports (1 to 65535)
-python scanner.py 192.168.1.1 -p -
+python vigilscan.py 192.168.1.1 -p -
 ```
 
 #### 4. Environment-based NVD API Scan
@@ -96,7 +117,7 @@ NVD_API_KEY=YOUR_NVD_API_KEY
 ```
 Then run the scanner normally. It will automatically load the key and query NVD with higher rate limits:
 ```bash
-python scanner.py scanme.nmap.org -p top1000 -oA scanme_report
+python vigilscan.py scanme.nmap.org -p top1000 -oA scanme_report
 ```
 *(If no API key is set in environment or `.env`, the scanner automatically limits request speed or transitions to a fast offline cache-only fallback mode if it detects consecutive outages).*
 
