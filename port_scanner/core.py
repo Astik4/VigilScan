@@ -101,7 +101,6 @@ def scan_port(ip, port, timeout, packet_trace=False, stealth_scan=False):
             pass
     return port, "Filtered"
 
-import os
 import re
 import platform
 import subprocess

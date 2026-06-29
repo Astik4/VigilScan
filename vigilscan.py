@@ -3,11 +3,9 @@ import time
 import os
 import datetime
 import ipaddress
-import socket
 from rich.console import Console
 from rich.panel import Panel
 from rich.align import Align
-from rich.text import Text
 from rich.table import Table
 from rich.box import ASCII
 

@@ -1,6 +1,5 @@
 import argparse
 import os
-import sys
 from port_scanner.constants import TOP_100_PORTS, TOP_1000_PORTS
 
 def parse_ports(ports_str):

@@ -1,6 +1,5 @@
 import socket
 import re
-import urllib.parse
 from port_scanner.constants import PORT_SERVICE_MAP
 
 def parse_service_banner(banner_str):
