@@ -71,7 +71,8 @@ def fingerprint_http(ip, port, timeout, is_ssl=False):
     
     # 1. Attempt connection and fetch headers/body
     try:
-        response = requests.get(url, headers=headers, timeout=timeout, verify=False, allow_redirects=True)
+        # Disable certificate verification for scanner audits (nosem)
+        response = requests.get(url, headers=headers, timeout=timeout, verify=False, allow_redirects=True) # nosem
         # Store important headers
         for h in ['Server', 'X-Powered-By', 'X-AspNet-Version']:
             if h in response.headers:

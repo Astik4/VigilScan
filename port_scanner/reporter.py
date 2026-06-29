@@ -1,6 +1,6 @@
 import json
 import datetime
-from jinja2 import Template
+from jinja2 import Environment, select_autoescape
 from rich.table import Table
 from rich.panel import Panel
 from rich.text import Text
@@ -1023,7 +1023,8 @@ def export_html_report(filepath, target_range, hosts_results, elapsed_seconds, s
         "average_risk": average_risk
     }
     
-    template = Template(HTML_TEMPLATE)
+    env = Environment(autoescape=select_autoescape(['html', 'xml']))
+    template = env.from_string(HTML_TEMPLATE)
     html_output = template.render(
         target_range=target_range,
         scan_time=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),

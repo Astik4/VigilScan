@@ -111,8 +111,9 @@ def grab_http_banner(ip, port, timeout, ssl=False):
     """
     Send a basic HTTP GET request and parse the Server header.
     """
-    import urllib.request
-    import ssl as ssl_mod
+    import requests
+    import urllib3
+    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
     
     protocol = "https" if ssl else "http"
     url = f"{protocol}://{ip}:{port}/"
@@ -120,24 +121,19 @@ def grab_http_banner(ip, port, timeout, ssl=False):
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) RiskScanner/1.0'
     }
-    req = urllib.request.Request(url, headers=headers)
-    
-    # Avoid SSL validation errors for scanner
-    ctx = ssl_mod.create_default_context()
-    ctx.check_hostname = False
-    ctx.verify_mode = ssl_mod.CERT_NONE
     
     try:
-        # Timeout is handled globally
-        with urllib.request.urlopen(req, timeout=timeout, context=ctx) as response:
-            server_header = response.headers.get('Server')
-            if server_header:
-                return f"HTTP/{port} {server_header}"
-    except urllib.error.HTTPError as e:
-        # Even on HTTP error (e.g. 401, 403, 404), the Server header might be present
-        server_header = e.headers.get('Server')
+        # Disable certificate validation for scanner audits (nosem)
+        response = requests.get(url, headers=headers, timeout=timeout, verify=False, allow_redirects=True) # nosem
+        server_header = response.headers.get('Server')
         if server_header:
             return f"HTTP/{port} {server_header}"
+    except requests.RequestException as e:
+        # If requests raised a connection or status exception, check if a response with headers is available
+        if hasattr(e, 'response') and e.response is not None:
+            server_header = e.response.headers.get('Server')
+            if server_header:
+                return f"HTTP/{port} {server_header}"
     except Exception:
         pass
     return None
