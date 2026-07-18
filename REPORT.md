@@ -28,7 +28,7 @@ flowchart TD
 ```
 
 ### Module Breakdown:
-1.  **`scanner.py`**: The main controller. Coordinates the scanning, detection, lookup, scoring, and output generation stages.
+1.  **`vigilscan.py`**: The main controller. Coordinates the scanning, detection, lookup, scoring, and output generation stages.
 2.  **`port_scanner/cli.py`**: Handles CLI arguments using `argparse`, validates ports and range inputs, parses presets, and retrieves NVD API keys.
 3.  **`port_scanner/core.py`**: Coordinates multithreaded socket connect operations using a `ThreadPoolExecutor` to speed up scans.
 4.  **`port_scanner/detector.py`**: Extracts service and version information by listening for protocol greetings or probing HTTP/HTTPS headers.
